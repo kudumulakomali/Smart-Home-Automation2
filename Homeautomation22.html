@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Home Automation</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+body {
+  margin:0; font-family:"Poppins", sans-serif;
+  background: linear-gradient(120deg,#f0f8ff,#ffe4e1);
+  display:flex; flex-direction:column; align-items:center;
+  padding:30px;
+}
+h1 { font-size:2.8em; color:#2c3e50; margin-bottom:30px; text-shadow:2px 2px 5px rgba(0,0,0,0.2);}
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:25px; width:95%; max-width:1200px;}
+.card { border-radius:20px; padding:25px; box-shadow:0 10px 30px rgba(0,0,0,0.15); background:linear-gradient(145deg,#fff,#f0f0f0); transition:0.3s all; position:relative;}
+.card:hover { transform:translateY(-5px); box-shadow:0 15px 35px rgba(0,0,0,0.2);}
+.card h2 { font-size:1.5em; margin-bottom:15px; color:#2c3e50; border-bottom:2px solid #00b894; padding-bottom:6px;}
+#bed1{background:linear-gradient(135deg,#ffe0e0,#ffb6c1);}
+#bed2{background:linear-gradient(135deg,#e0f7fa,#80deea);}
+#kitchen{background:linear-gradient(135deg,#e8f5e9,#a5d6a7);}
+#hall{background:linear-gradient(135deg,#f3e5f5,#ce93d8);}
+
+/* Enter Room switch */
+.presence-checkbox { display:none; }
+.presence-label {
+  display:inline-flex; align-items:center; margin-bottom:15px; padding:8px 15px;
+  border-radius:30px; background:rgba(255,255,255,0.7); cursor:pointer; font-weight:600; transition:0.3s all;
+}
+.presence-label .switch {
+  width:40px; height:20px; background:#ccc; border-radius:20px; position:relative; margin-left:10px; transition:0.3s all;
+}
+.presence-label .switch::after {
+  content:""; width:16px; height:16px; background:#fff; border-radius:50%; position:absolute; top:2px; left:2px; transition:0.3s all;
+}
+.presence-checkbox:checked + .presence-label .switch {
+  background:#00b894;
+}
+.presence-checkbox:checked + .presence-label .switch::after {
+  transform:translateX(20px);
+}
+
+/* Sensors */
+.sensor { background: rgba(255,255,255,0.6); border-left:4px solid #ff4500; padding:8px 12px; margin-top:8px; border-radius:8px; font-size:0.95em;}
+
+/* Devices */
+.device { display:flex; justify-content:space-between; align-items:center; margin:10px 0; padding:10px 14px; border-radius:12px; font-weight:500; background:rgba(255,255,255,0.3); transition:0.3s all; }
+.device i { font-size:1.5em; transition:0.3s all; }
+.device label {display:flex; justify-content:space-between; width:100%; cursor:pointer; align-items:center;}
+.device .switch { width:45px; height:24px; border-radius:30px; background:rgba(255,255,255,0.5); position:relative; transition:0.3s all;}
+.device .switch::after { content:""; width:20px;height:20px;border-radius:50%; background:#fff; position:absolute; top:2px; left:2px; transition:0.3s all;}
+.device input[type="checkbox"] { display:none; }
+.device input[type="checkbox"]:checked + label .switch { background:#00b894;}
+.device input[type="checkbox"]:checked + label .switch::after { transform:translateX(21px);}
+.device input[type="checkbox"]:checked + label { color:#fff; background: rgba(76,175,80,0.7);}
+.device input[type="checkbox"]:checked + label i { color:#ffff00; }
+.device input[type="checkbox"]:checked + label i.fa-lightbulb { text-shadow: 0 0 10px #fff700, 0 0 20px #fff700, 0 0 30px #ffd700;}
+.device input[type="checkbox"]:checked + label i.fa-fan { animation: spin 1s linear infinite;}
+@keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+/* Snow effect for AC */
+.snow {
+  pointer-events:none;
+  position:absolute;
+  top:0; left:0; width:100%; height:100%; overflow:hidden;
+  z-index:10;
+}
+.snow div {
+  position:absolute;
+  width:5px; height:5px;
+  background:#fff;
+  border-radius:50%;
+  animation:fall 3s linear infinite;
+}
+@keyframes fall {
+  0% { transform: translateY(-10px); opacity:1;}
+  100% { transform: translateY(300px); opacity:0;}
+}
+</style>
+</head>
+<body>
+<h1>🏡 Smart Home Automation Dashboard</h1>
+<div class="grid">
+
+<!-- Bedroom 1 -->
+<div class="card" id="bed1">
+<h2>Bedroom 1</h2>
+<input type="checkbox" id="bed1-presence" class="presence-checkbox">
+<label for="bed1-presence" class="presence-label">
+  Enter Room <span class="switch"></span>
+</label>
+<div class="sensor" id="bed1-temp">🌡 Temperature: 30°C</div>
+<div class="sensor">💧 Humidity: 65%</div>
+<div class="devices">
+  <div class="device"><input type="checkbox" id="bed1-lamp"><label for="bed1-lamp"><i class="fa-solid fa-lightbulb"></i> Lamp <div class="switch"></div></label></div>
+  <div class="device"><input type="checkbox" id="bed1-fan"><label for="bed1-fan"><i class="fa-solid fa-fan"></i> Fan <div class="switch"></div></label></div>
+  <div class="device"><input type="checkbox" id="bed1-ac"><label for="bed1-ac"><i class="fa-solid fa-snowflake"></i> Air Conditioner <div class="switch"></div></label></div>
+</div>
+<div class="snow" id="bed1-snow"></div>
+</div>
+
+<!-- Bedroom 2 -->
+<div class="card" id="bed2">
+<h2>Bedroom 2</h2>
+<input type="checkbox" id="bed2-presence" class="presence-checkbox">
+<label for="bed2-presence" class="presence-label">
+  Enter Room <span class="switch"></span>
+</label>
+<div class="devices">
+  <div class="device"><input type="checkbox" id="bed2-lamp"><label for="bed2-lamp"><i class="fa-solid fa-lightbulb"></i> Lamp <div class="switch"></div></label></div>
+  <div class="device"><input type="checkbox" id="bed2-fan"><label for="bed2-fan"><i class="fa-solid fa-fan"></i> Fan <div class="switch"></div></label></div>
+  <div class="device"><input type="checkbox" id="bed2-ac"><label for="bed2-ac"><i class="fa-solid fa-snowflake"></i> AC <div class="switch"></div></label></div>
+</div>
+<div class="snow" id="bed2-snow"></div>
+</div>
+
+<!-- Kitchen -->
+<div class="card" id="kitchen">
+<h2>Kitchen</h2>
+<input type="checkbox" id="kitchen-presence" class="presence-checkbox">
+<label for="kitchen-presence" class="presence-label">
+  Enter Room <span class="switch"></span>
+</label>
+<div class="devices">
+  <div class="device"><input type="checkbox" id="kitchen-lamp"><label for="kitchen-lamp"><i class="fa-solid fa-lightbulb"></i> Lamp <div class="switch"></div></label></div>
+  <div class="device"><input type="checkbox" id="kitchen-smoke"><label for="kitchen-smoke"><i class="fa-solid fa-smoking"></i> Smoke Sensor <div class="switch"></div></label></div>
+  <div class="device"><input type="checkbox" id="kitchen-fan"><label for="kitchen-fan"><i class="fa-solid fa-fan"></i> Exhaust Fan <div class="switch"></div></label></div>
+  <div class="device"><input type="checkbox" id="kitchen-fridge"><label for="kitchen-fridge"><i class="fa-solid fa-temperature-low"></i> Refrigerator <div class="switch"></div></label></div>
+</div>
+</div>
+
+<!-- Hall -->
+<div class="card" id="hall">
+<h2>Hall / Living Room</h2>
+<input type="checkbox" id="hall-presence" class="presence-checkbox">
+<label for="hall-presence" class="presence-label">
+  Enter Room <span class="switch"></span>
+</label>
+<div class="devices">
+  <div class="device"><input type="checkbox" id="hall-tv"><label for="hall-tv"><i class="fa-solid fa-tv"></i> Television <div class="switch"></div></label></div>
+  <div class="device"><input type="checkbox" id="hall-fan"><label for="hall-fan"><i class="fa-solid fa-fan"></i> Fan <div class="switch"></div></label></div>
+  <div class="device"><input type="checkbox" id="hall-lamp"><label for="hall-lamp"><i class="fa-solid fa-lightbulb"></i> Lamp <div class="switch"></div></label></div>
+  <div class="device"><input type="checkbox" id="hall-fridge"><label for="hall-fridge"><i class="fa-solid fa-temperature-low"></i> Refrigerator <div class="switch"></div></label></div>
+</div>
+</div>
+
+<script>
+  const rooms = [
+    {presence:'bed1-presence', devices:['bed1-lamp','bed1-fan','bed1-ac']},
+    {presence:'bed2-presence', devices:['bed2-lamp','bed2-fan','bed2-ac']},
+    {presence:'kitchen-presence', devices:['kitchen-lamp','kitchen-smoke','kitchen-fan','kitchen-fridge']},
+    {presence:'hall-presence', devices:['hall-tv','hall-fan','hall-lamp','hall-fridge']}
+  ];
+
+  rooms.forEach(room=>{
+    const presence = document.getElementById(room.presence);
+    presence.addEventListener('change', ()=>{
+      if(presence.checked){
+        // Turn ON main devices when entering
+        room.devices.forEach(id=>{
+          const el = document.getElementById(id);
+          if(el && (id.includes('lamp') || id.includes('fan')))
+            el.checked = true;
+        });
+
+        // Bedroom 1 temp logic
+        if(room.presence==='bed1-presence') handleBed1Temp();
+      } else {
+        // Turn OFF all devices when leaving the room
+        room.devices.forEach(id=>{
+          const el = document.getElementById(id);
+          if(el) el.checked = false;
+        });
+
+        // Stop snow effects
+        if(room.presence==='bed1-presence') document.getElementById('bed1-snow').innerHTML='';
+        if(room.presence==='bed2-presence') document.getElementById('bed2-snow').innerHTML='';
+      }
+    });
+  });
+
+  // Snow effect for AC
+  document.getElementById('bed1-ac').addEventListener('change', function(){
+    const snow = document.getElementById('bed1-snow');
+    if(this.checked) showSnow(snow);
+    else snow.innerHTML='';
+  });
+
+  document.getElementById('bed2-ac').addEventListener('change', function(){
+    const snow = document.getElementById('bed2-snow');
+    if(this.checked) showSnow(snow);
+    else snow.innerHTML='';
+  });
+
+  function handleBed1Temp(){
+    const tempEl = document.getElementById('bed1-temp');
+    const temp = parseInt(tempEl.textContent.match(/\d+/)[0]);
+    const fan = document.getElementById('bed1-fan');
+    const ac = document.getElementById('bed1-ac');
+    const snow = document.getElementById('bed1-snow');
+
+    if(temp >= 30){
+      fan.checked = false;
+      ac.checked = true;
+      showSnow(snow);
+    } else if(temp >= 28){
+      fan.checked = true;
+      ac.checked = false;
+      snow.innerHTML='';
+    } else {
+      fan.checked = false;
+      ac.checked = false;
+      snow.innerHTML='';
+    }
+  }
+
+  function showSnow(container){
+    container.innerHTML='';
+    for(let i=0;i<50;i++){
+      const snowflake = document.createElement('div');
+      snowflake.style.left = Math.random()*100 + '%';
+      snowflake.style.animationDuration = (2+Math.random()*3)+'s';
+      snowflake.style.opacity = Math.random();
+      container.appendChild(snowflake);
+    }
+  }
+</script>
+
+</body>
+</html>
